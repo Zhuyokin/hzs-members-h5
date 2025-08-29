@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相亲墙 - 寻找你的另一半</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .filters {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group select {
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-end;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .member-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .member-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .member-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .member-info {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            min-width: 80px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .info-value {
+            color: #333;
+            font-size: 0.95rem;
+        }
+        
+        .contact-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .page-btn {
+            padding: 10px 15px;
+            border: 2px solid #e1e8ed;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-info {
+            font-weight: 600;
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            font-size: 1.1rem;
+        }
+        
+        /* 性别标识 */
+        .gender-male {
+            color: #007bff;
+        }
+        
+        .gender-female {
+            color: #e91e63;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .filters {
+                padding: 20px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .members-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .member-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="header">
+            <h1>💕 相亲墙</h1>
+            <p>寻找属于你的另一半，开启美好人生新篇章</p>
+        </div>
+        
+        <!-- 筛选区域 -->
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="academic">学历</label>
+                    <select id="academic">
+                        <option value="">全部</option>
+                        <option value="0">无学历</option>
+                        <option value="1">小学</option>
+                        <option value="2">初中</option>
+                        <option value="3">高中</option>
+                        <option value="4">中专</option>
+                        <option value="5">大专</option>
+                        <option value="6">本科</option>
+                        <option value="7">211/985本科</option>
+                        <option value="8">研究生</option>
+                        <option value="9">博士</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="houseVehicle">房车</label>
+                    <select id="houseVehicle">
+                        <option value="">全部</option>
+                        <option value="0">无房无车</option>
+                        <option value="1">有房无车</option>
+                        <option value="2">无房有车</option>
+                        <option value="3">有房有车</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="marriage">婚姻状况</label>
+                    <select id="marriage">
+                        <option value="">全部</option>
+                        <option value="1">未婚单身</option>
+                        <option value="2">离异带孩</option>
+                        <option value="3">离异不带孩</option>
+                        <option value="4">丧偶带孩</option>
+                        <option value="5">丧偶不带孩</option>
+                    </select>
+                </div>
+                
+                <button class="search-btn" onclick="searchMembers()">🔍 搜索</button>
+            </div>
+        </div>
+        
+        <!-- 会员列表 -->
+        <div id="membersContainer">
+            <div class="loading">正在加载会员信息...</div>
+        </div>
+        
+        <!-- 分页 -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <button class="page-btn" id="prevBtn" onclick="prevPage()">← 上一页</button>
+            <span class="page-info" id="pageInfo">第 1 页 / 共 1 页</span>
+            <button class="page-btn" id="nextBtn" onclick="nextPage()">下一页 →</button>
+        </div>
+    </div>
+
+    <script>
+        // 数据映射
+        const academic_list = [
+            { value: undefined, label: '全部' },
+            { value: 0, label: '无学历' },
+            { value: 1, label: '小学' },
+            { value: 2, label: '初中' },
+            { value: 3, label: '高中' },
+            { value: 4, label: '中专' },
+            { value: 5, label: '大专' },
+            { value: 6, label: '本科' },
+            { value: 7, label: '211/985本科' },
+            { value: 8, label: '研究生' },
+            { value: 9, label: '博士' }
+        ];
+
+        const house_vehicle_list = [
+            { value: undefined, label: '全部' },
+            { value: 0, label: '无房无车' },
+            { value: 1, label: '有房无车' },
+            { value: 2, label: '无房有车' },
+            { value: 3, label: '有房有车' }
+        ];
+
+        const marriage_list = [
+            { value: undefined, label: '全部' },
+            { value: 1, label: '未婚单身' },
+            { value: 2, label: '离异带孩' },
+            { value: 3, label: '离异不带孩' },
+            { value: 4, label: '丧偶带孩' },
+            { value: 5, label: '丧偶不带孩' }
+        ];
+
+        const sexList = [
+            { value: undefined, label: '全部' },
+            { label: '女', value: 0 },
+            { label: '男', value: 1 }
+        ];
+
+        // 全局状态
+        let currentPage = 1;
+        let totalPages = 1;
+        const pageSize = 20; // 每页显示数量
+
+        // 工具函数：根据值获取标签
+        function getLabel(value, list) {
+            const item = list.find(item => item.value === value);
+            return item ? item.label : '未填写';
+        }
+
+        // 工具函数：格式化年龄
+        function formatAge(year) {
+            const currentYear = new Date().getFullYear();
+            const age = currentYear - parseInt(year);
+            return `${age}岁 (${year}年)`;
+        }
+
+        // 获取会员数据
+        async function fetchMembers(page = 1) {
+            try {
+                // 显示加载状态
+                document.getElementById('membersContainer').innerHTML = '<div class="loading">正在加载会员信息...</div>';
+                document.getElementById('pagination').style.display = 'none';
+
+                // 获取筛选条件
+                const academic = document.getElementById('academic').value;
+                const houseVehicle = document.getElementById('houseVehicle').value;
+                const marriage = document.getElementById('marriage').value;
+
+                // 构建API URL
+                const baseUrl = 'https://api.masdey.com/api/users/membersList';
+                const params = new URLSearchParams({
+                    page: page,
+                    limit: pageSize
+                });
+
+                if (academic) params.append('academic', academic);
+                if (houseVehicle) params.append('has_house_vehicle', houseVehicle);
+                if (marriage) params.append('marriage', marriage);
+
+                const url = `${baseUrl}?${params.toString()}`;
+                console.log('请求URL:', url);
+
+                // 发起请求
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    currentPage = data.data.pagination.current;
+                    totalPages = data.data.pagination.totalPages;
+                    
+                    renderMembers(data.data.list);
+                    updatePagination();
+                } else {
+                    throw new Error(data.message || '获取数据失败');
+                }
+            } catch (error) {
+                console.error('获取会员数据失败:', error);
+                document.getElementById('membersContainer').innerHTML = 
+                    `<div class="error">获取数据失败: ${error.message}<br><button onclick="fetchMembers(${page})" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">重试</button></div>`;
+            }
+        }
+
+        // 渲染会员列表
+        function renderMembers(members) {
+            const container = document.getElementById('membersContainer');
+            
+            if (!members || members.length === 0) {
+                container.innerHTML = '<div class="empty">暂无符合条件的会员信息</div>';
+                return;
+            }
+
+            const membersHTML = members.map(member => {
+                const sexText = member.sex === 1 ? '男' : '女';
+                const sexClass = member.sex === 1 ? 'gender-male' : 'gender-female';
+                const ageText = formatAge(member.year);
+                const academicLabel = getLabel(member.academic, academic_list);
+                const marriageLabel = getLabel(member.marriage, marriage_list);
+                const houseVehicleLabel = getLabel(member.has_house_vehicle, house_vehicle_list);
+
+                return `
+                    <div class="member-card">
+                        <div class="member-header">
+                            <div class="member-title">
+                                <span class="${sexClass}">${member.number}号${sexText} · ${ageText}</span>
+                            </div>
+                        </div>
+                        <div class="member-info">
+                            <div class="info-item">
+                                <span class="info-label">现居：</span>
+                                <span class="info-value">${member.city}市</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">身高：</span>
+                                <span class="info-value">${member.height}cm</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">学历：</span>
+                                <span class="info-value">${academicLabel}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">收入：</span>
+                                <span class="info-value">${member.income}元</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">婚姻状况：</span>
+                                <span class="info-value">${marriageLabel}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">房车：</span>
+                                <span class="info-value">${houseVehicleLabel}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">职业：</span>
+                                <span class="info-value">${member.career}</span>
+                            </div>
+                        </div>
+                        <button class="contact-btn" onclick="contactMember('${member.number}')">💬 联系我们</button>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="members-grid">${membersHTML}</div>`;
+        }
+
+        // 更新分页信息
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (totalPages > 1) {
+                pagination.style.display = 'flex';
+                pageInfo.textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+                prevBtn.disabled = currentPage <= 1;
+                nextBtn.disabled = currentPage >= totalPages;
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+
+        // 搜索会员
+        function searchMembers() {
+            currentPage = 1;
+            fetchMembers(1);
+        }
+
+        // 上一页
+        function prevPage() {
+            if (currentPage > 1) {
+                fetchMembers(currentPage - 1);
+            }
+        }
+
+        // 下一页
+        function nextPage() {
+            if (currentPage < totalPages) {
+                fetchMembers(currentPage + 1);
+            }
+        }
+
+        // 联系会员
+        function contactMember(memberNumber) {
+            alert(`想要联系 ${memberNumber} 号会员？\n\n请联系我们的客服：\n📱 微信：添加客服微信\n📞 电话：400-123-4567\n🏠 地址：梅州市梅江区梅州三路`);
+        }
+
+        // 页面加载完成后自动获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchMembers(1);
+        });
+
+        // 回车键搜索
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMembers();
+            }
+        });
+    </script>
+</body>
+</html>

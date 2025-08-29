@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>相亲会员墙</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- 配置Tailwind自定义颜色和字体 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#7B61FF',
+            accent: '#F5A9B8',
+            blue: '#1E90FF',
+            'blue-dark': '#1976D2',
+            pink: '#FF1493',
+            'pink-light': '#FF69B4',
+            'pink-soft': '#FFB6C1',
+            neutral: {
+              100: '#F5F7FA',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-hover {
+        @apply transition-all duration-300 hover:shadow-md hover:-translate-y-0.5;
+      }
+      .filter-select {
+        @apply w-full px-3 py-2 rounded-lg border border-neutral-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none appearance-none transition-all text-sm;
+      }
+      .btn-primary {
+        @apply bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm;
+      }
+      .tab-active {
+        @apply text-primary border-primary;
+      }
+      .masonry-grid {
+        columns: 2;
+        column-gap: 12px;
+      }
+      @media (min-width: 768px) {
+        .masonry-grid {
+          columns: 2;
+          column-gap: 16px;
+        }
+      }
+      .masonry-item {
+        break-inside: avoid;
+        margin-bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-neutral-100 text-neutral-700 min-h-screen flex flex-col">
+  <!-- 页面容器 -->
+  <div class="container mx-auto px-3 py-6 pb-20 max-w-7xl flex-grow">
+    <!-- 标题区域 -->
+    <header class="mb-3 text-center">
+      <h1 class="text-[clamp(1.3rem,2.5vw,1.8rem)] font-bold text-primary mb-1">优质相亲会员墙</h1>
+      <p class="text-neutral-500 text-xs">真诚交友，缘分从这里开始</p>
+    </header>
+    
+    <!-- 筛选区域 - 4个下拉筛选器 -->
+    <section id="filterSection" class="bg-white rounded-lg p-3 mb-4 shadow-sm">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <!-- 性别筛选 -->
+        <div class="relative">
+          <label class="block text-xs font-medium text-neutral-600 mb-1">性别</label>
+          <select id="sex" class="filter-select">
+            <option value="">全部</option>
+            <option value="0">女士</option>
+            <option value="1">男士</option>
+          </select>
+          <div class="absolute right-3 top-7 pointer-events-none text-neutral-400 text-xs">
+            <i class="fa fa-chevron-down"></i>
+          </div>
+        </div>
+        
+        <!-- 学历筛选 -->
+        <div class="relative">
+          <label class="block text-xs font-medium text-neutral-600 mb-1">学历</label>
+          <select id="academic" class="filter-select">
+            <option value="">全部</option>
+            <option value="0">无学历</option>
+            <option value="1">小学</option>
+            <option value="2">初中</option>
+            <option value="3">高中</option>
+            <option value="4">中专</option>
+            <option value="5">大专</option>
+            <option value="6">本科</option>
+            <option value="7">211/985本科</option>
+            <option value="8">研究生</option>
+            <option value="9">博士</option>
+          </select>
+          <div class="absolute right-3 top-7 pointer-events-none text-neutral-400 text-xs">
+            <i class="fa fa-chevron-down"></i>
+          </div>
+        </div>
+        
+        <!-- 房车筛选 -->
+        <div class="relative">
+          <label class="block text-xs font-medium text-neutral-600 mb-1">房车</label>
+          <select id="houseVehicle" class="filter-select">
+            <option value="">全部</option>
+            <option value="0">无房无车</option>
+            <option value="1">有房无车</option>
+            <option value="2">无房有车</option>
+            <option value="3">有房有车</option>
+          </select>
+          <div class="absolute right-3 top-7 pointer-events-none text-neutral-400 text-xs">
+            <i class="fa fa-chevron-down"></i>
+          </div>
+        </div>
+        
+        <!-- 婚姻状况筛选 -->
+        <div class="relative">
+          <label class="block text-xs font-medium text-neutral-600 mb-1">婚姻</label>
+          <select id="marriage" class="filter-select">
+            <option value="">全部</option>
+            <option value="1">未婚单身</option>
+            <option value="2">离异带孩</option>
+            <option value="3">离异不带孩</option>
+            <option value="4">丧偶带孩</option>
+            <option value="5">丧偶不带孩</option>
+          </select>
+          <div class="absolute right-3 top-7 pointer-events-none text-neutral-400 text-xs">
+            <i class="fa fa-chevron-down"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 主要内容区 -->
+    <section class="mb-6 flex-grow">
+      <!-- 会员列表内容 -->
+      <div id="membersListContent" class="block">
+        <div id="membersList" class="masonry-grid">
+          <!-- 会员卡片将通过JavaScript动态生成 -->
+          <div class="flex justify-center items-center h-48 text-neutral-400 w-full">
+            <div class="text-center">
+              <i class="fa fa-spinner fa-spin text-xl mb-3"></i>
+              <p class="text-sm">加载中...</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 分页控件 -->
+        <div id="pagination" class="mt-6 flex justify-center items-center gap-3 text-sm">
+          <button id="prevPage" class="px-4 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md">
+            <i class="fa fa-chevron-left text-sm mr-1"></i>
+            <span class="hidden sm:inline">上一页</span>
+          </button>
+          <div class="px-4 py-2 bg-white rounded-full shadow-md border border-neutral-200">
+            <span id="pageInfo" class="font-medium text-neutral-700">第 1 页 / 共 0 页</span>
+          </div>
+          <button id="nextPage" class="px-4 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md">
+            <span class="hidden sm:inline">下一页</span>
+            <i class="fa fa-chevron-right text-sm ml-1"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- 关于我们内容 -->
+      <div id="aboutUsContent" class="hidden bg-white rounded-lg p-6 shadow-sm">
+        <h2 class="text-xl font-bold text-primary mb-4">关于我们</h2>
+        
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2">平台介绍</h3>
+          <p class="text-neutral-600 text-sm leading-relaxed">
+            我们是一家专注于真诚交友的相亲平台，致力于为广大单身人士提供安全、可靠的交友环境。平台所有会员均经过严格认证，确保信息真实有效。
+          </p>
+        </div>
+        
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2">我们的优势</h3>
+          <ul class="text-neutral-600 text-sm space-y-2">
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+              <span>所有会员信息严格审核，确保真实可靠</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+              <span>专业匹配算法，提高交友成功率</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+              <span>严格保护用户隐私，安全放心</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+              <span>线下实体门店，提供一对一专业服务</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2">联系我们</h3>
+          <ul class="text-neutral-600 text-sm space-y-2">
+            <li class="flex items-center">
+              <i class="fa fa-phone text-secondary w-5 mr-2"></i>
+              <a href="tel:13823827595" class="text-primary hover:underline">手机/微信：138-2382-7595</a>
+            </li>
+            <li class="flex items-center">
+              <i class="fa fa-user text-secondary w-5 mr-2"></i>
+              <span>联系人：朱先生</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fa fa-map-marker text-secondary w-5 mr-2"></i>
+              <span>地址：广东省梅州市梅江区城西大道田心47-7号第一层店面</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2">关注我们</h3>
+          <ul class="text-neutral-600 text-sm space-y-3">
+            <li class="flex items-center">
+              <i class="fa fa-wechat text-green-500 w-5 mr-2"></i>
+              <div>
+                <span class="block">公众号：好真实婚姻介绍所</span>
+                <a href="https://mp.weixin.qq.com/s?__biz=MzkxNTU5MjY2OA==&mid=2247483659&idx=1&sn=f161bef4788e43314e8a580fc1629ce8&chksm=c15d85b8f62a0cae3d474bb5a28ee5049d2c151482786d36a1823da2b744a6bd9aaef7bf0936&token=2106551450&lang=zh_CN#rd" target="_blank" class="text-primary text-xs hover:underline">点击关注 →</a>
+              </div>
+            </li>
+            <li class="flex items-center">
+              <i class="fa fa-video-camera text-red-500 w-5 mr-2"></i>
+              <div>
+                <span class="block">抖音账号：梅州红娘，勤劳致富辛苦</span>
+                <a href="https://www.douyin.com/user/MS4wLjABAAAA68xwG6PYXWYOdMh4GQqxOgjDt2X-cK7wyCsju9jvkW8" target="_blank" class="text-primary text-xs hover:underline">点击关注 →</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="text-center">
+          <a href="https://twyba92hl90.feishu.cn/share/base/form/shrcnErBifXi1r99HjtWwjG4GPc" target="_blank" class="btn-primary inline-flex items-center gap-1 no-underline mr-3">
+            <i class="fa fa-user-plus"></i>
+            <span>我要登记</span>
+          </a>
+          <a href="tel:13823827595" class="btn-primary inline-flex items-center gap-1 no-underline bg-secondary hover:bg-secondary/90">
+            <i class="fa fa-phone"></i>
+            <span>联系我们</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+  <!-- 底部Tab切换 - 两个选项 - 固定定位 -->
+  <div class="fixed bottom-0 left-0 right-0 border-t border-neutral-200 bg-white py-2 px-4 md:hidden z-50">
+    <div class="flex justify-around">
+      <button class="tab-item tab-active flex flex-col items-center py-1 px-3 text-xs" data-tab="members">
+        <i class="fa fa-list text-lg mb-1"></i>
+        <span>会员列表</span>
+      </button>
+      <button class="tab-item flex flex-col items-center py-1 px-3 text-xs text-neutral-500" data-tab="about">
+        <i class="fa fa-info-circle text-lg mb-1"></i>
+        <span>关于我们</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- 桌面端Tab切换 - 固定定位 -->
+  <div class="hidden md:block fixed bottom-0 left-0 right-0 border-t border-neutral-200 bg-white py-3 px-4 z-50">
+    <div class="flex justify-center gap-12">
+      <button class="tab-item tab-active flex items-center gap-2 py-1 px-3 text-sm font-medium" data-tab="members">
+        <i class="fa fa-list"></i>
+        <span>会员列表</span>
+      </button>
+      <button class="tab-item flex items-center gap-2 py-1 px-3 text-sm font-medium text-neutral-500" data-tab="about">
+        <i class="fa fa-info-circle"></i>
+        <span>关于我们</span>
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // 数据映射表 - 将数值转换为文字描述
+    const houseVehicleMap = {
+      0: '无房无车',
+      1: '有房无车',
+      2: '无房有车',
+      3: '有房有车'
+    };
+    
+    const sexMap = {
+      0: '女',
+      1: '男'
+    };
+    
+    const academicMap = {
+      0: '无学历',
+      1: '小学',
+      2: '初中',
+      3: '高中',
+      4: '中专',
+      5: '大专',
+      6: '本科',
+      7: '211/985本科',
+      8: '研究生',
+      9: '博士'
+    };
+    
+    const marriageMap = {
+      1: '未婚单身',
+      2: '离异带孩',
+      3: '离异不带孩',
+      4: '丧偶带孩',
+      5: '丧偶不带孩',
+      null: '未填写'
+    };
+    
+    // 全局变量
+    let currentPage = 1;
+    let totalPages = 0;
+    let activeTab = 'members';
+    
+    // DOM元素
+    const membersListEl = document.getElementById('membersList');
+    const membersListContent = document.getElementById('membersListContent');
+    const aboutUsContent = document.getElementById('aboutUsContent');
+    const filterSection = document.getElementById('filterSection');
+    const pageInfoEl = document.getElementById('pageInfo');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    const sexSelect = document.getElementById('sex');
+    const academicSelect = document.getElementById('academic');
+    const houseVehicleSelect = document.getElementById('houseVehicle');
+    const marriageSelect = document.getElementById('marriage');
+    const tabItems = document.querySelectorAll('.tab-item');
+    
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', () => {
+      // 默认加载会员列表
+      if (activeTab === 'members') {
+        fetchMembers();
+      }
+      
+      // 绑定事件
+      // 绑定筛选器change事件
+      sexSelect.addEventListener('change', () => {
+        currentPage = 1;
+        fetchMembers();
+      });
+      
+      academicSelect.addEventListener('change', () => {
+        currentPage = 1;
+        fetchMembers();
+      });
+      
+      houseVehicleSelect.addEventListener('change', () => {
+        currentPage = 1;
+        fetchMembers();
+      });
+      
+      marriageSelect.addEventListener('change', () => {
+        currentPage = 1;
+        fetchMembers();
+      });
+      
+      prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          fetchMembers();
+        }
+      });
+      
+      nextPageBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          fetchMembers();
+        }
+      });
+      
+      // 绑定Tab切换事件
+      tabItems.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.dataset.tab;
+          if (tabName === activeTab) return;
+          
+          // 更新Tab状态
+          tabItems.forEach(t => t.classList.remove('tab-active'));
+          tab.classList.add('tab-active');
+          
+          // 更新活跃Tab
+          activeTab = tabName;
+          
+          // 显示对应内容
+          if (tabName === 'members') {
+            membersListContent.classList.remove('hidden');
+            aboutUsContent.classList.add('hidden');
+            filterSection.classList.remove('hidden');
+            // 如果是首次切换到会员列表，加载数据
+            if (membersListEl.innerHTML.includes('加载中')) {
+              fetchMembers();
+            }
+          } else {
+            membersListContent.classList.add('hidden');
+            aboutUsContent.classList.remove('hidden');
+            filterSection.classList.add('hidden');
+          }
+        });
+      });
+    });
+    
+    // 获取会员数据
+    async function fetchMembers() {
+      // 显示加载状态
+      membersListEl.innerHTML = `
+        <div class="col-span-full flex justify-center items-center h-64 text-neutral-400 w-full">
+          <div class="text-center">
+            <i class="fa fa-spinner fa-spin text-2xl mb-3 text-primary"></i>
+            <p class="text-base text-neutral-600">加载会员数据中...</p>
+          </div>
+        </div>
+      `;
+      
+      // 获取筛选条件
+      const sex = sexSelect.value || '';
+      const academic = academicSelect.value || '';
+      const marriage = marriageSelect.value || '';
+      const hasHouseVehicle = houseVehicleSelect.value || '';
+      
+      try {
+        // 构建API URL
+        const baseUrl = 'https://api.masdey.com/api/users/membersList';
+        const params = new URLSearchParams({
+          page: currentPage,
+          limit: 10, // 每页显示10个会员
+        });
+        
+        if (sex) params.append('sex', sex);
+        if (academic) params.append('academic', academic);
+        if (marriage) params.append('marriage', marriage);
+        if (hasHouseVehicle) params.append('has_house_vehicle', hasHouseVehicle);
+        
+        const url = `${baseUrl}?${params.toString()}`;
+        
+        // 调用API
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          totalPages = data.data.pagination.totalPages;
+          renderMembers(data.data.list);
+          updatePagination();
+        } else {
+          membersListEl.innerHTML = `
+            <div class="col-span-full flex justify-center items-center h-64 text-neutral-400 w-full">
+              <div class="text-center">
+                <i class="fa fa-users text-3xl mb-3 text-neutral-300"></i>
+                <p class="text-base text-neutral-600">暂无数据</p>
+              </div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('获取会员数据失败:', error);
+        membersListEl.innerHTML = `
+          <div class="col-span-full flex justify-center items-center h-64 text-neutral-400 w-full">
+            <div class="text-center">
+              <i class="fa fa-exclamation-triangle text-3xl mb-3 text-orange-400"></i>
+              <p class="text-base text-neutral-600">加载失败，请重试</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+    
+    // 格式化收入显示
+    function formatIncome(income) {
+      if (!income || income === '0' || income === '') return '面议';
+      
+      // 移除可能的"元"字和逗号
+      const numStr = income.toString().replace(/[元,]/g, '');
+      const num = parseFloat(numStr);
+      
+      if (isNaN(num)) return income;
+      
+      if (num >= 10000) {
+        const wNum = num / 10000;
+        return wNum % 1 === 0 ? `${wNum}W` : `${wNum.toFixed(1)}W`;
+      } else if (num >= 1000) {
+        const kNum = num / 1000;
+        return kNum % 1 === 0 ? `${kNum}K` : `${kNum.toFixed(1)}K`;
+      }
+      
+      return income;
+    }
+    
+    // 渲染会员列表
+    function renderMembers(members) {
+      if (members.length === 0) {
+        membersListEl.innerHTML = `
+          <div class="col-span-full flex justify-center items-center h-64 text-neutral-400 w-full">
+            <div class="text-center">
+              <i class="fa fa-search text-3xl mb-3 text-neutral-300"></i>
+              <p class="text-base text-neutral-600">没有找到符合条件的会员</p>
+              <p class="text-sm text-neutral-400 mt-1">请尝试调整筛选条件</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      membersListEl.innerHTML = '';
+      
+      members.forEach(member => {
+        // 计算年龄
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - parseInt(member.year);
+        
+        // 根据性别确定颜色：男用蓝色，女用粉色
+        const genderColor = member.sex === 1 ? 'text-blue' : 'text-pink';
+        
+        // 创建会员卡片（瀑布流布局）
+        const card = document.createElement('div');
+        card.className = `masonry-item bg-white rounded-lg overflow-hidden shadow-sm card-hover border border-neutral-100`;
+        
+        card.innerHTML = `
+          <div class="p-3 md:p-4">
+            <div class="flex justify-between items-start mb-3">
+              <h3 class="text-lg md:text-xl font-semibold ${genderColor} leading-tight">
+                ${member.number}号${sexMap[member.sex]}·${age}岁
+              </h3>
+              <span class="bg-neutral-100 text-neutral-600 text-xs px-2 py-0.5 rounded-full flex-shrink-0 ml-1">
+                ${member.status === 1 ? '已认证' : '待审核'}
+              </span>
+            </div>
+            
+            <ul class="space-y-2 text-neutral-600 text-sm md:text-base leading-relaxed">
+              <li class="flex items-center">
+                <i class="fa fa-map-marker text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <span>现居：${member.city}市</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fa fa-arrows-v text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <span>身高：${member.height}cm</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fa fa-graduation-cap text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <span>学历：${academicMap[member.academic]}</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fa fa-money text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <span>收入：${formatIncome(member.income)}</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fa fa-heart text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <span>婚姻：${marriageMap[member.marriage]}</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fa fa-home text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <span>房车：${houseVehicleMap[member.has_house_vehicle]}</span>
+              </li>
+              <li class="flex items-center">
+                <i class="fa fa-briefcase text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <span>职业：${member.career}</span>
+              </li>
+            </ul>
+            
+
+          </div>
+        `;
+        
+        membersListEl.appendChild(card);
+      });
+    }
+    
+    // 更新分页信息
+    function updatePagination() {
+      pageInfoEl.textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+      
+      // 禁用/启用分页按钮
+      prevPageBtn.disabled = currentPage <= 1;
+      nextPageBtn.disabled = currentPage >= totalPages;
+    }
+  </script>
+</body>
+</html>

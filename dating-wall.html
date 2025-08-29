@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>相亲会员墙 · 商务现代风</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- 字体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- 配置Tailwind自定义颜色和字体 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#7B61FF',
+            accent: '#F5A9B8',
+            neutral: {
+              100: '#F5F7FA',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <!-- 自定义样式（不使用 @apply 以兼容 lint） -->
+  <style>
+    .content-auto { content-visibility: auto; }
+    .card-hover { transition: all .3s ease; }
+    .card-hover:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+    .btn-primary { background:#165DFF; color:#fff; padding: .5rem 1rem; border-radius:.5rem; font-weight:500; font-size: .875rem; transition: .2s; }
+    .btn-primary:hover { filter: brightness(0.95); }
+    .tag-btn { position:relative; padding-bottom:.5rem; font-size:14px; font-weight:500; color:#4E5969; }
+    .tag-btn[data-active="true"] { color:#165DFF; }
+    .tag-btn::after { content:''; position:absolute; left:0; bottom:-1px; height:2px; width:0; background:#165DFF; transition: width .2s; }
+    .tag-btn[data-active="true"]::after { width:100%; }
+  </style>
+</head>
+<body class="font-inter bg-neutral-100 text-neutral-700 min-h-screen">
+  <!-- 页面容器 -->
+  <div class="container mx-auto px-3 py-6 max-w-7xl">
+    <!-- 标题区域 -->
+    <header class="mb-6 text-center">
+      <h1 class="text-[clamp(1.5rem,3vw,2rem)] font-extrabold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-1">优质相亲会员墙</h1>
+      <p class="text-neutral-500 text-sm">高效匹配，邂逅缘分</p>
+    </header>
+    
+    <!-- 筛选区域（标签式 + 模态） -->
+    <section class="bg-white rounded-lg p-4 mb-3 shadow-sm">
+      <div class="flex items-center gap-5 border-b border-neutral-200">
+        <button id="btnAcademic" class="tag-btn" data-active="false">学历</button>
+        <button id="btnHouseVehicle" class="tag-btn" data-active="false">房车</button>
+        <button id="btnMarriage" class="tag-btn" data-active="false">婚姻状况</button>
+        <div class="ml-auto text-xs text-neutral-400">点击标签进行筛选</div>
+      </div>
+    </section>
+    
+    <!-- 主要内容区 - 左右两列展示 -->
+    <section class="mb-8">
+  <div id="membersList" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- 会员卡片将通过JavaScript动态生成 -->
+        <div class="flex justify-center items-center h-48 text-neutral-400 col-span-1 md:col-span-2">
+          <div class="text-center">
+            <i class="fa fa-spinner fa-spin text-xl mb-3"></i>
+            <p class="text-sm">加载中...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 分页控件 -->
+      <div id="pagination" class="mt-6 flex justify-center items-center gap-2 text-sm">
+        <button id="prevPage" class="px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fa fa-chevron-left text-xs"></i>
+        </button>
+        <span id="pageInfo" class="px-3 py-1.5">第 1 页 / 共 0 页</span>
+        <button id="nextPage" class="px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fa fa-chevron-right text-xs"></i>
+        </button>
+      </div>
+    </section>
+    
+    <!-- 页脚 -->
+    <footer class="text-center text-neutral-500 text-xs py-4 border-t border-neutral-200">
+      <p>© 2024 相亲墙 - 高效交友平台</p>
+    </footer>
+    <!-- 筛选模态框 -->
+    <div id="filterModal" class="fixed inset-0 hidden items-center justify-center z-[3000]">
+      <div class="absolute inset-0 bg-black/10"></div>
+      <div class="relative w-[92%] max-w-md rounded-xl bg-white shadow-2xl p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-[16px] font-semibold text-neutral-700">筛选条件</h3>
+          <div class="flex items-center gap-2">
+            <button id="filterReset" class="px-3 py-1.5 text-[13px] text-neutral-600 bg-neutral-100 rounded hover:bg-neutral-200">重置</button>
+            <button id="filterConfirm" class="px-3 py-1.5 text-[13px] text-white bg-primary rounded hover:opacity-90">确定</button>
+          </div>
+        </div>
+        <div class="space-y-3 max-h-[60vh] overflow-auto pr-1">
+          <div>
+            <div class="text-[13px] text-neutral-500 mb-2">学历</div>
+            <div id="groupAcademic" class="flex flex-col divide-y divide-neutral-100 rounded-lg border border-neutral-100 overflow-hidden">
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="">全部</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="0">无学历</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="1">小学</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="2">初中</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="3">高中</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="4">中专</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="5">大专</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="6">本科</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="7">211/985本科</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="8">研究生</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="9">博士</button>
+            </div>
+          </div>
+          <div>
+            <div class="text-[13px] text-neutral-500 mb-2">房车</div>
+            <div id="groupHouseVehicle" class="flex flex-col divide-y divide-neutral-100 rounded-lg border border-neutral-100 overflow-hidden">
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="">全部</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="0">无房无车</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="1">有房无车</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="2">无房有车</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="3">有房有车</button>
+            </div>
+          </div>
+          <div>
+            <div class="text-[13px] text-neutral-500 mb-2">婚姻状况</div>
+            <div id="groupMarriage" class="flex flex-col divide-y divide-neutral-100 rounded-lg border border-neutral-100 overflow-hidden">
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="">全部</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="1">未婚单身</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="2">离异带孩</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="3">离异不带孩</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="4">丧偶带孩</button>
+              <button class="px-3 py-2 text-left text-[14px] hover:bg-neutral-50" data-value="5">丧偶不带孩</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 数据映射表 - 将数值转换为文字描述
+    const houseVehicleMap = {
+      0: '无房无车',
+      1: '有房无车',
+      2: '无房有车',
+      3: '有房有车'
+    };
+    
+    const sexMap = {
+      0: '女',
+      1: '男'
+    };
+    
+    const academicMap = {
+      0: '无学历',
+      1: '小学',
+      2: '初中',
+      3: '高中',
+      4: '中专',
+      5: '大专',
+      6: '本科',
+      7: '211/985本科',
+      8: '研究生',
+      9: '博士'
+    };
+    
+    const marriageMap = {
+      1: '未婚单身',
+      2: '离异带孩',
+      3: '离异不带孩',
+      4: '丧偶带孩',
+      5: '丧偶不带孩',
+      null: '未填写'
+    };
+    
+    // 全局变量
+  let currentPage = 1;
+  let totalPages = 0;
+  let currentFilters = { academic: '', has_house_vehicle: '', marriage: '' };
+    
+    // DOM元素
+    const membersListEl = document.getElementById('membersList');
+    const pageInfoEl = document.getElementById('pageInfo');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+  const btnAcademic = document.getElementById('btnAcademic');
+  const btnHouseVehicle = document.getElementById('btnHouseVehicle');
+  const btnMarriage = document.getElementById('btnMarriage');
+  const modal = document.getElementById('filterModal');
+  const resetBtn = document.getElementById('filterReset');
+  const confirmBtn = document.getElementById('filterConfirm');
+  const groupAcademic = document.getElementById('groupAcademic');
+  const groupHouseVehicle = document.getElementById('groupHouseVehicle');
+  const groupMarriage = document.getElementById('groupMarriage');
+    
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', () => {
+      // 筛选 UI 逻辑
+      setupFiltersUI();
+      // 数据
+      fetchMembers();
+
+      // 分页
+      prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) { currentPage--; fetchMembers(); }
+      });
+      nextPageBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) { currentPage++; fetchMembers(); }
+      });
+    });
+
+    function setupFiltersUI() {
+      let tempFilters = { ...currentFilters };
+
+      const openModal = (focus) => {
+        tempFilters = { ...currentFilters };
+        refreshGroupUI();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        const map = { academic: groupAcademic, has_house_vehicle: groupHouseVehicle, marriage: groupMarriage };
+        const el = map[focus];
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+      const closeModal = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      };
+
+      const refreshGroupUI = () => {
+        const apply = (groupEl, key) => {
+          if (!groupEl) return;
+          const value = tempFilters[key] ?? '';
+          groupEl.querySelectorAll('button').forEach(btn => {
+            const selected = (btn.dataset.value ?? '') === String(value ?? '');
+            btn.classList.toggle('bg-primary/5', selected);
+            btn.classList.toggle('text-primary', selected);
+            btn.classList.toggle('ring-1', selected);
+            btn.classList.toggle('ring-primary/20', selected);
+            btn.classList.toggle('border-l-2', selected);
+            btn.classList.toggle('border-primary', selected);
+            btn.classList.toggle('pl-2', selected);
+          });
+        };
+        apply(groupAcademic, 'academic');
+        apply(groupHouseVehicle, 'has_house_vehicle');
+        apply(groupMarriage, 'marriage');
+      };
+
+      const wireGroup = (groupEl, key) => {
+        if (!groupEl) return;
+        groupEl.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            tempFilters[key] = btn.dataset.value;
+            refreshGroupUI();
+          });
+        });
+      };
+      wireGroup(groupAcademic, 'academic');
+      wireGroup(groupHouseVehicle, 'has_house_vehicle');
+      wireGroup(groupMarriage, 'marriage');
+
+      const setActive = (btn, isActive) => {
+        if (!btn) return;
+        btn.dataset.active = isActive ? 'true' : 'false';
+      };
+      const updateTopFilterLabels = () => {
+        setActive(btnAcademic, currentFilters.academic !== '');
+        setActive(btnHouseVehicle, currentFilters.has_house_vehicle !== '');
+        setActive(btnMarriage, currentFilters.marriage !== '');
+      };
+
+      if (btnAcademic) btnAcademic.addEventListener('click', () => openModal('academic'));
+      if (btnHouseVehicle) btnHouseVehicle.addEventListener('click', () => openModal('has_house_vehicle'));
+      if (btnMarriage) btnMarriage.addEventListener('click', () => openModal('marriage'));
+      modal.addEventListener('click', (e) => { const overlay = modal.querySelector('.absolute'); if (e.target === overlay) closeModal(); });
+      if (resetBtn) resetBtn.addEventListener('click', () => { tempFilters = { academic: '', has_house_vehicle: '', marriage: '' }; refreshGroupUI(); });
+      if (confirmBtn) confirmBtn.addEventListener('click', () => { currentFilters = { ...tempFilters }; updateTopFilterLabels(); closeModal(); currentPage = 1; fetchMembers(); });
+
+      updateTopFilterLabels();
+    }
+    
+    // 获取会员数据
+    async function fetchMembers() {
+      // 显示加载状态
+      membersListEl.innerHTML = `
+        <div class="flex justify-center items-center h-48 text-neutral-400 col-span-1 md:col-span-2">
+          <div class="text-center">
+            <i class="fa fa-spinner fa-spin text-xl mb-3"></i>
+            <p class="text-sm">加载会员数据中...</p>
+          </div>
+        </div>
+      `;
+      
+      try {
+        // 构建API URL
+        const baseUrl = 'https://api.masdey.com/api/users/membersList';
+        const params = new URLSearchParams({
+          page: currentPage,
+          limit: 10, // 每页10个（两列更紧凑）
+        });
+        const { academic, has_house_vehicle, marriage } = currentFilters;
+        if (academic) params.append('academic', academic);
+        if (marriage) params.append('marriage', marriage);
+        if (has_house_vehicle) params.append('has_house_vehicle', has_house_vehicle);
+        
+        const url = `${baseUrl}?${params.toString()}`;
+        
+        // 调用API
+        const response = await fetch(url);
+        const data = await response.json();
+        
+  if (data.success && data.data) {
+          totalPages = data.data.pagination.totalPages;
+          renderMembers(data.data.list);
+          updatePagination();
+        } else {
+          membersListEl.innerHTML = `
+            <div class="flex justify-center items-center h-48 text-neutral-400 col-span-1 md:col-span-2">
+              <p class="text-sm">暂无数据</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('获取会员数据失败:', error);
+        membersListEl.innerHTML = `
+          <div class="flex justify-center items-center h-48 text-neutral-400 col-span-1 md:col-span-2">
+            <p class="text-sm">加载失败，请重试</p>
+          </div>
+        `;
+      }
+    }
+    
+    // 渲染会员列表
+    function renderMembers(members) {
+      if (members.length === 0) {
+        membersListEl.innerHTML = `
+          <div class="flex justify-center items-center h-48 text-neutral-400 col-span-1 md:col-span-2">
+            <p class="text-sm">没有找到符合条件的会员</p>
+          </div>
+        `;
+        return;
+      }
+      
+      membersListEl.innerHTML = '';
+      
+      members.forEach(member => {
+        // 计算年龄
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - parseInt(member.year);
+        
+        // 创建会员卡片（紧凑排版）
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-lg overflow-hidden shadow-sm card-hover border border-neutral-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300';
+        
+        card.innerHTML = `
+          <div class="p-4">
+            <div class="flex justify-between items-start mb-3">
+              <h3 class="text-[18px] font-semibold text-primary">${member.number}号${sexMap[member.sex]}·${age}岁</h3>
+              <span class="bg-neutral-100 text-neutral-600 text-[11px] px-2 py-0.5 rounded-full">
+                ${member.status === 1 ? '已认证' : '待审核'}
+              </span>
+            </div>
+            
+            <ul class="space-y-1.5 text-neutral-600 text-[14px]">
+              <li class="flex items-center"><i class="fa fa-map-marker text-secondary w-4 mr-1"></i><span>现居：${member.city || ''}市</span></li>
+              <li class="flex items-center"><i class="fa fa-arrows-v text-secondary w-4 mr-1"></i><span>身高：${member.height || ''}cm</span></li>
+              <li class="flex items-center"><i class="fa fa-graduation-cap text-secondary w-4 mr-1"></i><span>学历：${academicMap[member.academic]}</span></li>
+              <li class="flex items-center"><i class="fa fa-money text-secondary w-4 mr-1"></i><span>收入：${member.income || ''}</span></li>
+              <li class="flex items-center"><i class="fa fa-heart text-secondary w-4 mr-1"></i><span>婚姻：${marriageMap[member.marriage]}</span></li>
+              <li class="flex items-center"><i class="fa fa-home text-secondary w-4 mr-1"></i><span>房车：${houseVehicleMap[member.has_house_vehicle]}</span></li>
+              <li class="flex items-center"><i class="fa fa-briefcase text-secondary w-4 mr-1"></i><span>职业：${member.career || ''}</span></li>
+            </ul>
+            
+            <div class="mt-4">
+              <button class="w-full text-[14px] rounded bg-gradient-to-r from-[#4080FF] to-primary text-white py-2.5 font-medium shadow hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition">联系我们</button>
+            </div>
+          </div>
+        `;
+        
+        membersListEl.appendChild(card);
+      });
+    }
+    
+    // 更新分页信息
+    function updatePagination() {
+      pageInfoEl.textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+      
+      // 禁用/启用分页按钮
+      prevPageBtn.disabled = currentPage <= 1;
+      nextPageBtn.disabled = currentPage >= totalPages;
+    }
+  </script>
+</body>
+</html>
