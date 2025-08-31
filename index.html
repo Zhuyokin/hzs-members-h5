@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>相亲会员墙</title>
   <!-- 引入Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./js/tailwindcss.js"></script>
   <!-- 引入Font Awesome -->
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="./css/font-awesome.min.css" rel="stylesheet">
   
   <!-- 配置Tailwind自定义颜色和字体 -->
   <script>
@@ -62,6 +62,8 @@
       .masonry-grid {
         columns: 2;
         column-gap: 12px;
+        display: flex;
+        flex-wrap: wrap;
       }
       @media (min-width: 768px) {
         .masonry-grid {
@@ -72,6 +74,10 @@
       .masonry-item {
         break-inside: avoid;
         margin-bottom: 12px;
+        width: 48%;
+      }
+      .loading-container {
+        flex-shrink: 0;
       }
     }
   </style>
@@ -80,9 +86,21 @@
   <!-- 页面容器 -->
   <div class="container mx-auto px-3 py-6 pb-20 max-w-7xl flex-grow">
     <!-- 标题区域 -->
-    <header class="mb-3 text-center">
-      <h1 class="text-[clamp(1.3rem,2.5vw,1.8rem)] font-bold text-primary mb-1">优质相亲会员墙</h1>
-      <p class="text-neutral-500 text-xs">真诚交友，缘分从这里开始</p>
+    <header class="mb-3 text-center relative">
+      <!-- 装饰性心形图标 -->
+      <div class="absolute -top-2 left-1/2 transform -translate-x-1/2">
+        <i class="fa fa-heart text-accent text-2xl opacity-20"></i>
+      </div>
+      <h1 class="text-[clamp(1.3rem,2.5vw,1.8rem)] font-bold text-primary mb-1 flex items-center justify-center gap-2">
+        <i class="fa fa-heart text-primary"></i>
+        优质相亲会员墙
+        <i class="fa fa-heart text-accent"></i>
+      </h1>
+      <p class="text-neutral-500 text-xs flex items-center justify-center gap-1">
+        <i class="fa fa-sparkles text-accent text-xs"></i>
+        真诚交友，缘分从这里开始
+        <i class="fa fa-sparkles text-accent text-xs"></i>
+      </p>
     </header>
     
     <!-- 筛选区域 - 4个下拉筛选器 -->
@@ -90,7 +108,10 @@
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <!-- 性别筛选 -->
         <div class="relative">
-          <label class="block text-xs font-medium text-neutral-600 mb-1">性别</label>
+          <label class="block text-xs font-medium text-neutral-600 mb-1 flex items-center gap-1">
+            <i class="fa fa-venus-mars text-accent"></i>
+            性别
+          </label>
           <select id="sex" class="filter-select">
             <option value="">全部</option>
             <option value="0">女士</option>
@@ -103,7 +124,10 @@
         
         <!-- 学历筛选 -->
         <div class="relative">
-          <label class="block text-xs font-medium text-neutral-600 mb-1">学历</label>
+          <label class="block text-xs font-medium text-neutral-600 mb-1 flex items-center gap-1">
+            <i class="fa fa-graduation-cap text-primary"></i>
+            学历
+          </label>
           <select id="academic" class="filter-select">
             <option value="">全部</option>
             <option value="0">无学历</option>
@@ -124,7 +148,10 @@
         
         <!-- 房车筛选 -->
         <div class="relative">
-          <label class="block text-xs font-medium text-neutral-600 mb-1">房车</label>
+          <label class="block text-xs font-medium text-neutral-600 mb-1 flex items-center gap-1">
+            <i class="fa fa-home text-green-600"></i>
+            房车
+          </label>
           <select id="houseVehicle" class="filter-select">
             <option value="">全部</option>
             <option value="0">无房无车</option>
@@ -139,7 +166,10 @@
         
         <!-- 婚姻状况筛选 -->
         <div class="relative">
-          <label class="block text-xs font-medium text-neutral-600 mb-1">婚姻</label>
+          <label class="block text-xs font-medium text-neutral-600 mb-1 flex items-center gap-1">
+            <i class="fa fa-heart text-pink"></i>
+            婚姻
+          </label>
           <select id="marriage" class="filter-select">
             <option value="">全部</option>
             <option value="1">未婚单身</option>
@@ -161,16 +191,16 @@
       <div id="membersListContent" class="block">
         <div id="membersList" class="masonry-grid">
           <!-- 会员卡片将通过JavaScript动态生成 -->
-          <div class="flex justify-center items-center h-48 text-neutral-400 w-full">
+          <div class="flex justify-center items-center h-48 text-neutral-400 w-full loading-container">
             <div class="text-center">
-              <i class="fa fa-spinner fa-spin text-xl mb-3"></i>
-              <p class="text-sm">加载中...</p>
+              <i class="fa fa-spinner fa-spin text-2xl mb-3 text-primary"></i>
+              <p class="text-base font-medium text-primary animate-pulse">加载中...</p>
             </div>
           </div>
         </div>
         
         <!-- 分页控件 -->
-        <div id="pagination" class="mt-6 flex justify-center items-center gap-3 text-sm">
+        <div id="pagination" class="mt-6 flex justify-center items-center gap-3 text-sm" >
           <button id="prevPage" class="px-4 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md">
             <i class="fa fa-chevron-left text-sm mr-1"></i>
             <span class="hidden sm:inline">上一页</span>
@@ -197,57 +227,66 @@
         </div>
         
         <div class="mb-6">
-          <h3 class="text-lg font-semibold text-neutral-700 mb-2">我们的优势</h3>
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2 flex items-center gap-2">
+            <i class="fa fa-star text-yellow-500"></i>
+            我们的优势
+          </h3>
           <ul class="text-neutral-600 text-sm space-y-2">
             <li class="flex items-start">
-              <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+              <i class="fa fa-shield text-green-500 mt-1 mr-2"></i>
               <span>所有会员信息严格审核，确保真实可靠</span>
             </li>
             <li class="flex items-start">
-              <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+              <i class="fa fa-magic text-purple-500 mt-1 mr-2"></i>
               <span>专业匹配算法，提高交友成功率</span>
             </li>
             <li class="flex items-start">
-              <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+              <i class="fa fa-lock text-blue-500 mt-1 mr-2"></i>
               <span>严格保护用户隐私，安全放心</span>
             </li>
             <li class="flex items-start">
-              <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+              <i class="fa fa-handshake-o text-accent mt-1 mr-2"></i>
               <span>线下实体门店，提供一对一专业服务</span>
             </li>
           </ul>
         </div>
         
         <div class="mb-6">
-          <h3 class="text-lg font-semibold text-neutral-700 mb-2">联系我们</h3>
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2 flex items-center gap-2">
+            <i class="fa fa-phone text-primary"></i>
+            联系我们
+          </h3>
           <ul class="text-neutral-600 text-sm space-y-2">
             <li class="flex items-center">
-              <i class="fa fa-phone text-secondary w-5 mr-2"></i>
+              <i class="fa fa-mobile text-green-500 w-5 mr-2"></i>
               <a href="tel:13823827595" class="text-primary hover:underline">手机/微信：138-2382-7595</a>
             </li>
             <li class="flex items-center">
-              <i class="fa fa-user text-secondary w-5 mr-2"></i>
+              <i class="fa fa-user-circle text-blue-500 w-5 mr-2"></i>
               <span>联系人：朱先生</span>
             </li>
             <li class="flex items-center">
-              <i class="fa fa-map-marker text-secondary w-5 mr-2"></i>
+              <i class="fa fa-building text-orange-500 w-5 mr-2"></i>
               <span>地址：广东省梅州市梅江区城西大道田心47-7号第一层店面</span>
             </li>
           </ul>
         </div>
         
         <div class="mb-6">
-          <h3 class="text-lg font-semibold text-neutral-700 mb-2">关注我们</h3>
+          <h3 class="text-lg font-semibold text-neutral-700 mb-2 flex items-center gap-2">
+            <i class="fa fa-share-alt text-accent"></i>
+            关注我们
+          </h3>
           <ul class="text-neutral-600 text-sm space-y-3">
             <li class="flex items-center">
-              <i class="fa fa-wechat text-green-500 w-5 mr-2"></i>
+              <i class="fa fa-comments text-green-500 w-5 mr-2"></i>
               <div>
                 <span class="block">公众号：好真实婚姻介绍所</span>
                 <a href="https://mp.weixin.qq.com/s?__biz=MzkxNTU5MjY2OA==&mid=2247483659&idx=1&sn=f161bef4788e43314e8a580fc1629ce8&chksm=c15d85b8f62a0cae3d474bb5a28ee5049d2c151482786d36a1823da2b744a6bd9aaef7bf0936&token=2106551450&lang=zh_CN#rd" target="_blank" class="text-primary text-xs hover:underline">点击关注 →</a>
               </div>
             </li>
             <li class="flex items-center">
-              <i class="fa fa-video-camera text-red-500 w-5 mr-2"></i>
+              <i class="fa fa-music text-red-500 w-5 mr-2"></i>
               <div>
                 <span class="block">抖音账号：梅州红娘，勤劳致富辛苦</span>
                 <a href="https://www.douyin.com/user/MS4wLjABAAAA68xwG6PYXWYOdMh4GQqxOgjDt2X-cK7wyCsju9jvkW8" target="_blank" class="text-primary text-xs hover:underline">点击关注 →</a>
@@ -274,11 +313,11 @@
   <div class="fixed bottom-0 left-0 right-0 border-t border-neutral-200 bg-white py-2 px-4 md:hidden z-50">
     <div class="flex justify-around">
       <button class="tab-item tab-active flex flex-col items-center py-1 px-3 text-xs" data-tab="members">
-        <i class="fa fa-list text-lg mb-1"></i>
+        <i class="fa fa-users text-lg mb-1"></i>
         <span>会员列表</span>
       </button>
       <button class="tab-item flex flex-col items-center py-1 px-3 text-xs text-neutral-500" data-tab="about">
-        <i class="fa fa-info-circle text-lg mb-1"></i>
+        <i class="fa fa-heart text-lg mb-1"></i>
         <span>关于我们</span>
       </button>
     </div>
@@ -288,11 +327,11 @@
   <div class="hidden md:block fixed bottom-0 left-0 right-0 border-t border-neutral-200 bg-white py-3 px-4 z-50">
     <div class="flex justify-center gap-12">
       <button class="tab-item tab-active flex items-center gap-2 py-1 px-3 text-sm font-medium" data-tab="members">
-        <i class="fa fa-list"></i>
+        <i class="fa fa-users"></i>
         <span>会员列表</span>
       </button>
       <button class="tab-item flex items-center gap-2 py-1 px-3 text-sm font-medium text-neutral-500" data-tab="about">
-        <i class="fa fa-info-circle"></i>
+        <i class="fa fa-heart"></i>
         <span>关于我们</span>
       </button>
     </div>
@@ -433,11 +472,14 @@
       membersListEl.innerHTML = `
         <div class="col-span-full flex justify-center items-center h-64 text-neutral-400 w-full">
           <div class="text-center">
-            <i class="fa fa-spinner fa-spin text-2xl mb-3 text-primary"></i>
-            <p class="text-base text-neutral-600">加载会员数据中...</p>
+            <i class="fa fa-spinner fa-spin text-3xl mb-4 text-primary"></i>
+            <p class="text-lg font-medium text-primary animate-pulse">加载会员数据中...</p>
+            <p class="text-sm text-neutral-500 mt-2">请稍候片刻</p>
           </div>
         </div>
       `;
+
+      // return
       
       // 获取筛选条件
       const sex = sexSelect.value || '';
@@ -552,33 +594,33 @@
               </span>
             </div>
             
-            <ul class="space-y-2 text-neutral-600 text-sm md:text-base leading-relaxed">
+            <ul class="space-y-2.5 text-neutral-700 text-base md:text-lg leading-relaxed font-medium">
               <li class="flex items-center">
-                <i class="fa fa-map-marker text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <i class="fa fa-map-marker text-accent w-5 md:w-6 mr-3 flex-shrink-0"></i>
                 <span>现居：${member.city}市</span>
               </li>
               <li class="flex items-center">
-                <i class="fa fa-arrows-v text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <i class="fa fa-male text-secondary w-5 md:w-6 mr-3 flex-shrink-0"></i>
                 <span>身高：${member.height}cm</span>
               </li>
               <li class="flex items-center">
-                <i class="fa fa-graduation-cap text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <i class="fa fa-graduation-cap text-primary w-5 md:w-6 mr-3 flex-shrink-0"></i>
                 <span>学历：${academicMap[member.academic]}</span>
               </li>
               <li class="flex items-center">
-                <i class="fa fa-money text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <i class="fa fa-diamond text-amber-500 w-5 md:w-6 mr-3 flex-shrink-0"></i>
                 <span>收入：${formatIncome(member.income)}</span>
               </li>
               <li class="flex items-center">
-                <i class="fa fa-heart text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <i class="fa fa-heart text-pink w-5 md:w-6 mr-3 flex-shrink-0"></i>
                 <span>婚姻：${marriageMap[member.marriage]}</span>
               </li>
               <li class="flex items-center">
-                <i class="fa fa-home text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <i class="fa fa-home text-green-600 w-5 md:w-6 mr-3 flex-shrink-0"></i>
                 <span>房车：${houseVehicleMap[member.has_house_vehicle]}</span>
               </li>
               <li class="flex items-center">
-                <i class="fa fa-briefcase text-secondary w-4 md:w-5 mr-2 flex-shrink-0"></i>
+                <i class="fa fa-star text-yellow-500 w-5 md:w-6 mr-3 flex-shrink-0"></i>
                 <span>职业：${member.career}</span>
               </li>
             </ul>
