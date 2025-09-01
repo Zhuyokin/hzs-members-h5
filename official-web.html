@@ -625,10 +625,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <h3 class="text-2xl font-bold mb-6">免费咨询</h3>
-                    <form>
+                    <form id="contactForm">
                         <div class="mb-6">
                             <label for="name" class="block text-gray-700 font-medium mb-2">姓名</label>
-                            <input type="text" id="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请输入您的姓名">
+                            <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请输入您的姓名">
                         </div>
                         
                         <div class="mb-6">
@@ -647,12 +647,12 @@
                         
                         <div class="mb-6">
                             <label for="phone" class="block text-gray-700 font-medium mb-2">手机号码</label>
-                            <input type="tel" id="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请输入您的手机号码">
+                            <input type="tel" id="phone" name="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请输入您的手机号码">
                         </div>
                         
                         <div class="mb-6">
                             <label for="message" class="block text-gray-700 font-medium mb-2">您的需求</label>
-                            <textarea id="message" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请简要描述您的择偶需求"></textarea>
+                            <textarea id="message" name="message" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请简要描述您的择偶需求"></textarea>
                         </div>
                         
                         <button type="submit" class="w-full bg-gradient-love text-white px-6 py-4 rounded-lg font-medium hover:shadow-lg transition-custom">
@@ -924,6 +924,52 @@
                 top: 0,
                 behavior: 'smooth'
             });
+        });
+        
+        // 表单数据收集函数
+        function collectFormData() {
+            const form = document.getElementById('contactForm');
+            const formData = new FormData(form);
+            const data = {};
+            
+            // 收集所有表单字段
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // 添加提交时间戳
+            data.submitTime = new Date().toISOString();
+            data.submitTimestamp = Date.now();
+            
+            return data;
+        }
+        
+        // 表单提交处理
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // 阻止默认提交行为
+            
+            // 收集表单数据
+            const formData = collectFormData();
+            
+            // 在控制台打印JSON数据
+            console.log('=== 联系表单数据 ===');
+            console.log(JSON.stringify(formData, null, 2));
+            console.log('=== 原始数据对象 ===');
+            console.log(formData);
+            
+            // 验证必填字段
+            if (!formData.name || !formData.phone) {
+                alert('请填写姓名和手机号码');
+                return;
+            }
+            
+            if (!formData.gender) {
+                alert('请选择性别');
+                return;
+            }
+            
+            // 这里可以添加实际的提交逻辑
+            alert('表单数据已收集，请查看控制台输出！');
         });
         
         // 平滑滚动
