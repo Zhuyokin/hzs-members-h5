@@ -44,10 +44,77 @@
             .stat-card {
                 @apply bg-white rounded-xl shadow-lg p-6 transform hover:-translate-y-2 transition-all duration-300 hover:shadow-xl;
             }
+            
+            /* 自定义弹窗样式 */
+            .modal-overlay {
+                @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4;
+            }
+            
+            .modal-content {
+                @apply bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto transform transition-all duration-300;
+            }
+            
+            .modal-header {
+                @apply px-6 py-4 border-b border-gray-200;
+            }
+            
+            .modal-body {
+                @apply px-6 py-4;
+            }
+            
+            .modal-footer {
+                @apply px-6 py-4 border-t border-gray-200 flex justify-end space-x-3;
+            }
+            
+            .btn-modal {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50;
+            }
+            
+            .btn-modal-primary {
+                @apply bg-primary text-white hover:bg-primary/90 focus:ring-primary;
+            }
+            
+            .btn-modal-secondary {
+                @apply bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-400;
+            }
         }
     </style>
 </head>
 <body class="font-sans text-dark bg-white">
+    <!-- 自定义弹窗组件 -->
+    <div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto transform transition-all duration-300 scale-95" id="modalContent">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">提示</h3>
+                    <button id="modalCloseBtn" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="px-6 py-6">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div id="modalIcon" class="w-8 h-8 rounded-full flex items-center justify-center">
+                            <i class="fa fa-info-circle text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <p id="modalMessage" class="text-gray-700 leading-relaxed whitespace-pre-line"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="modalCancelBtn" class="px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-400 hidden">
+                    取消
+                </button>
+                <button id="modalConfirmBtn" class="px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50 bg-primary text-white hover:bg-primary/90 focus:ring-primary">
+                    确定
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 导航栏 -->
     <header id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-sm">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -627,12 +694,15 @@
                     <h3 class="text-2xl font-bold mb-6">免费咨询</h3>
                     <form id="contactForm">
                         <div class="mb-6">
-                            <label for="name" class="block text-gray-700 font-medium mb-2">姓名</label>
-                            <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请输入您的姓名">
+                            <label for="name" class="block text-gray-700 font-medium mb-2">姓名 <span class="text-red-500">*</span></label>
+                            <input type="text" id="name" name="name" maxlength="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请输入您的姓名（最多6个字）">
+                            <div class="text-xs text-gray-500 mt-1">
+                                <span id="nameCount">0</span>/6 个字符
+                            </div>
                         </div>
                         
                         <div class="mb-6">
-                            <label for="gender" class="block text-gray-700 font-medium mb-2">性别</label>
+                            <label for="gender" class="block text-gray-700 font-medium mb-2">性别 <span class="text-red-500">*</span></label>
                             <div class="flex space-x-4">
                                 <label class="inline-flex items-center">
                                     <input type="radio" name="gender" value="male" class="w-4 h-4 text-primary">
@@ -646,13 +716,17 @@
                         </div>
                         
                         <div class="mb-6">
-                            <label for="phone" class="block text-gray-700 font-medium mb-2">手机号码</label>
-                            <input type="tel" id="phone" name="phone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请输入您的手机号码">
+                            <label for="phone" class="block text-gray-700 font-medium mb-2">手机号码 <span class="text-red-500">*</span></label>
+                            <input type="tel" id="phone" name="phone" maxlength="11" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请输入11位手机号码">
+                            <div id="phoneError" class="text-xs text-red-500 mt-1 hidden">请输入正确的手机号码格式</div>
                         </div>
                         
                         <div class="mb-6">
                             <label for="message" class="block text-gray-700 font-medium mb-2">您的需求</label>
-                            <textarea id="message" name="message" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请简要描述您的择偶需求"></textarea>
+                            <textarea id="message" name="message" rows="4" maxlength="500" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-custom" placeholder="请简要描述您的择偶需求（最多500字）"></textarea>
+                            <div class="text-xs text-gray-500 mt-1">
+                                <span id="messageCount">0</span>/500 个字符
+                            </div>
                         </div>
                         
                         <button type="submit" class="w-full bg-gradient-love text-white px-6 py-4 rounded-lg font-medium hover:shadow-lg transition-custom">
@@ -926,6 +1000,179 @@
             });
         });
         
+        // 自定义弹窗功能
+        class CustomModal {
+            constructor() {
+                this.modal = document.getElementById('customModal');
+                this.modalContent = document.getElementById('modalContent');
+                this.modalTitle = document.getElementById('modalTitle');
+                this.modalMessage = document.getElementById('modalMessage');
+                this.modalIcon = document.getElementById('modalIcon');
+                this.modalConfirmBtn = document.getElementById('modalConfirmBtn');
+                this.modalCancelBtn = document.getElementById('modalCancelBtn');
+                this.modalCloseBtn = document.getElementById('modalCloseBtn');
+                
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                // 点击确定按钮
+                this.modalConfirmBtn.addEventListener('click', () => {
+                    this.resolve && this.resolve(true);
+                    this.hide();
+                });
+                
+                // 点击取消按钮
+                this.modalCancelBtn.addEventListener('click', () => {
+                    this.resolve && this.resolve(false);
+                    this.hide();
+                });
+                
+                // 点击关闭按钮
+                this.modalCloseBtn.addEventListener('click', () => {
+                    this.resolve && this.resolve(false);
+                    this.hide();
+                });
+                
+                // 点击遮罩层关闭
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target === this.modal) {
+                        this.resolve && this.resolve(false);
+                        this.hide();
+                    }
+                });
+                
+                // ESC键关闭
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && !this.modal.classList.contains('hidden')) {
+                        this.resolve && this.resolve(false);
+                        this.hide();
+                    }
+                });
+            }
+            
+            show(options = {}) {
+                const {
+                    title = '提示',
+                    message = '',
+                    type = 'info', // info, success, warning, error
+                    showCancel = false,
+                    confirmText = '确定',
+                    cancelText = '取消'
+                } = options;
+                
+                this.modalTitle.textContent = title;
+                this.modalMessage.textContent = message;
+                this.modalConfirmBtn.textContent = confirmText;
+                this.modalCancelBtn.textContent = cancelText;
+                
+                // 设置图标和样式
+                this.setModalType(type);
+                
+                // 显示/隐藏取消按钮
+                if (showCancel) {
+                    this.modalCancelBtn.classList.remove('hidden');
+                } else {
+                    this.modalCancelBtn.classList.add('hidden');
+                }
+                
+                // 显示弹窗
+                this.modal.classList.remove('hidden');
+                
+                // 添加动画效果
+                setTimeout(() => {
+                    this.modalContent.classList.remove('scale-95');
+                    this.modalContent.classList.add('scale-100');
+                }, 10);
+                
+                // 聚焦到确定按钮
+                setTimeout(() => {
+                    this.modalConfirmBtn.focus();
+                }, 100);
+                
+                return new Promise((resolve) => {
+                    this.resolve = resolve;
+                });
+            }
+            
+            setModalType(type) {
+                // 重置样式
+                this.modalIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center';
+                
+                switch (type) {
+                    case 'success':
+                        this.modalIcon.classList.add('bg-green-100', 'text-green-600');
+                        this.modalIcon.innerHTML = '<i class="fa fa-check text-xl"></i>';
+                        break;
+                    case 'warning':
+                        this.modalIcon.classList.add('bg-yellow-100', 'text-yellow-600');
+                        this.modalIcon.innerHTML = '<i class="fa fa-exclamation-triangle text-xl"></i>';
+                        break;
+                    case 'error':
+                        this.modalIcon.classList.add('bg-red-100', 'text-red-600');
+                        this.modalIcon.innerHTML = '<i class="fa fa-times-circle text-xl"></i>';
+                        break;
+                    default: // info
+                        this.modalIcon.classList.add('bg-blue-100', 'text-blue-600');
+                        this.modalIcon.innerHTML = '<i class="fa fa-info-circle text-xl"></i>';
+                }
+            }
+            
+            hide() {
+                this.modalContent.classList.remove('scale-100');
+                this.modalContent.classList.add('scale-95');
+                
+                setTimeout(() => {
+                    this.modal.classList.add('hidden');
+                }, 200);
+            }
+        }
+        
+        // 初始化弹窗
+        const customModal = new CustomModal();
+        
+        // 替换原生 alert 的函数
+        function showAlert(message, type = 'info', title = '提示') {
+            return customModal.show({
+                title,
+                message,
+                type
+            });
+        }
+        
+        // 确认对话框
+        function showConfirm(message, title = '确认') {
+            return customModal.show({
+                title,
+                message,
+                type: 'warning',
+                showCancel: true,
+                confirmText: '确定',
+                cancelText: '取消'
+            });
+        }
+        
+        // 成功提示
+        function showSuccess(message, title = '成功') {
+            return customModal.show({
+                title,
+                message,
+                type: 'success'
+            });
+        }
+        
+        // 错误提示
+        function showError(message, title = '错误') {
+            return customModal.show({
+                title,
+                message,
+                type: 'error'
+            });
+        }
+        
+        // 飞书Webhook地址
+        const FEISHU_WEBHOOK_URL = "https://open.feishu.cn/open-apis/bot/v2/hook/639bf243-1568-4f91-b4da-e8d4102291d1";
+
         // 表单数据收集函数
         function collectFormData() {
             const form = document.getElementById('contactForm');
@@ -937,19 +1184,222 @@
                 data[key] = value;
             }
             
+            // 性别转换为中文
+            if (data.gender) {
+                data.genderText = data.gender === 'male' ? '男' : '女';
+            }
+            
             // 添加提交时间戳
             data.submitTime = new Date().toISOString();
             data.submitTimestamp = Date.now();
             
             return data;
         }
+
+        // 格式化提交时间为本地时间
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // 发送数据到飞书Webhook
+        async function sendToFeishu(data) {
+            try {
+                // 构造飞书消息格式（交互式卡片）
+                const message = {
+                    "msg_type": "interactive",
+                    "card": {
+                        "config": {
+                            "wide_screen_mode": true
+                        },
+                        "header": {
+                            "title": {
+                                "content": "🎯 官网新的婚恋咨询表单提交",
+                                "tag": "plain_text"
+                            },
+                            "template": "blue"
+                        },
+                        "elements": [
+                            {
+                                "fields": [
+                                    {
+                                        "is_short": true,
+                                        "text": {
+                                            "content": `**👤 姓名**：${data.name}`,
+                                            "tag": "lark_md"
+                                        }
+                                    },
+                                    {
+                                        "is_short": true,
+                                        "text": {
+                                            "content": `**⚧ 性别**：${data.genderText}`,
+                                            "tag": "lark_md"
+                                        }
+                                    },
+                                    {
+                                        "is_short": true,
+                                        "text": {
+                                            "content": `**📱 电话**：${data.phone}`,
+                                            "tag": "lark_md"
+                                        }
+                                    },
+                                    {
+                                        "is_short": true,
+                                        "text": {
+                                            "content": `**⏰ 提交时间**：${formatTime(data.submitTimestamp)}`,
+                                            "tag": "lark_md"
+                                        }
+                                    }
+                                ],
+                                "tag": "div"
+                            },
+                            {
+                                "tag": "div",
+                                "text": {
+                                    "content": `**💬 择偶需求**：${data.message || '客户暂未填写具体需求'}`,
+                                    "tag": "lark_md"
+                                }
+                            },
+                            {
+                                "tag": "hr"
+                            },
+                            {
+                                "tag": "div",
+                                "text": {
+                                    "content": `📞 **建议尽快联系客户：${data.phone}**`,
+                                    "tag": "lark_md"
+                                }
+                            }
+                        ]
+                    }
+                };
+
+                // 发送POST请求
+                const response = await fetch(FEISHU_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(message)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.code === 0) {
+                    console.log('✅ 数据推送到飞书成功');
+                    return true;
+                } else {
+                    console.error('❌ 飞书推送失败:', result.msg || '未知错误');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ 飞书推送过程出错:', error);
+                return false;
+            }
+        }
+        
+        // 手机号码验证函数
+        function validatePhone(phone) {
+            // 中国大陆手机号码正则表达式
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            return phoneRegex.test(phone);
+        }
+        
+        // 实时字符计数功能
+        function setupCharacterCount() {
+            const nameInput = document.getElementById('name');
+            const messageInput = document.getElementById('message');
+            const phoneInput = document.getElementById('phone');
+            const nameCount = document.getElementById('nameCount');
+            const messageCount = document.getElementById('messageCount');
+            const phoneError = document.getElementById('phoneError');
+            
+            // 姓名字符计数
+            nameInput.addEventListener('input', function() {
+                const count = this.value.length;
+                nameCount.textContent = count;
+                
+                if (count > 6) {
+                    this.value = this.value.substring(0, 6);
+                    nameCount.textContent = 6;
+                }
+            });
+            
+            // 需求字符计数
+            messageInput.addEventListener('input', function() {
+                const count = this.value.length;
+                messageCount.textContent = count;
+                
+                if (count > 500) {
+                    this.value = this.value.substring(0, 500);
+                    messageCount.textContent = 500;
+                }
+            });
+            
+            // 手机号码实时验证
+            phoneInput.addEventListener('input', function() {
+                const phone = this.value.trim();
+                if (phone.length > 0 && !validatePhone(phone)) {
+                    phoneError.classList.remove('hidden');
+                    this.classList.add('border-red-500');
+                    this.classList.remove('border-gray-300');
+                } else {
+                    phoneError.classList.add('hidden');
+                    this.classList.remove('border-red-500');
+                    this.classList.add('border-gray-300');
+                }
+            });
+        }
         
         // 表单提交处理
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault(); // 阻止默认提交行为
             
             // 收集表单数据
             const formData = collectFormData();
+            
+            // 验证必填字段
+            if (!formData.name || formData.name.trim() === '') {
+                await showError('请填写姓名', '表单验证');
+                document.getElementById('name').focus();
+                return;
+            }
+            
+            if (formData.name.length > 6) {
+                await showError('姓名不能超过6个字符', '表单验证');
+                document.getElementById('name').focus();
+                return;
+            }
+            
+            if (!formData.gender) {
+                await showError('请选择性别', '表单验证');
+                return;
+            }
+            
+            if (!formData.phone || formData.phone.trim() === '') {
+                await showError('请填写手机号码', '表单验证');
+                document.getElementById('phone').focus();
+                return;
+            }
+            
+            if (!validatePhone(formData.phone)) {
+                await showError('请输入正确的手机号码格式\n\n正确格式：13800138000', '手机号码错误');
+                document.getElementById('phone').focus();
+                return;
+            }
+            
+            if (formData.message && formData.message.length > 500) {
+                await showError('需求描述不能超过500个字符', '表单验证');
+                document.getElementById('message').focus();
+                return;
+            }
             
             // 在控制台打印JSON数据
             console.log('=== 联系表单数据 ===');
@@ -957,19 +1407,62 @@
             console.log('=== 原始数据对象 ===');
             console.log(formData);
             
-            // 验证必填字段
-            if (!formData.name || !formData.phone) {
-                alert('请填写姓名和手机号码');
-                return;
-            }
+            // 显示提交中的提示
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = '提交中...';
+            submitButton.disabled = true;
             
-            if (!formData.gender) {
-                alert('请选择性别');
-                return;
+            try {
+                // 推送数据到飞书
+                const success = await sendToFeishu(formData);
+                
+                if (success) {
+                    // 推送成功
+                    await showSuccess(`咨询信息提交成功！
+                    
+👤 姓名：${formData.name}
+⚧ 性别：${formData.genderText}
+📱 手机：${formData.phone}
+💬 需求：${formData.message || '无'}
+
+我们会尽快联系您，请保持手机畅通！`, '提交成功');
+                    
+                    // 清空表单
+                    this.reset();
+                    document.getElementById('nameCount').textContent = '0';
+                    document.getElementById('messageCount').textContent = '0';
+                    
+                } else {
+                    // 推送失败但数据已收集
+                    await showError(`信息已记录，但推送过程出现问题
+                    
+我们已收到您的咨询信息：
+👤 姓名：${formData.name}
+📱 手机：${formData.phone}
+
+请直接致电 138-2382-7595 联系我们，或稍后重试提交。`, '推送异常');
+                }
+                
+            } catch (error) {
+                console.error('提交过程出错:', error);
+                await showError(`提交过程出现错误
+                
+请尝试以下方式联系我们：
+📞 直接致电：138-2382-7595
+🏢 到店咨询：梅州市梅江区城西大道田心47-7号
+
+或者稍后重试在线提交。`, '提交失败');
+            } finally {
+                // 恢复按钮状态
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
             }
-            
-            // 这里可以添加实际的提交逻辑
-            alert('表单数据已收集，请查看控制台输出！');
+        });
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            setupCharacterCount();
         });
         
         // 平滑滚动
