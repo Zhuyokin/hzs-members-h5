@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>好真实婚姻介绍所 - 专业婚恋服务</title>
+    <!-- 引入html2canvas库用于图片生成 -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+        }
+        
+        body {
+            background-color: #f9f6f7;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px; /* 移动端减少内边距 */
+        }
+        
+        .controls {
+            margin-bottom: 15px;
+            text-align: center;
+            width: 100%; /* 控制区自适应宽度 */
+            max-width: 500px; /* 限制最大宽度，避免大屏拉伸 */
+        }
+        
+        .btn {
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            padding: 12px 24px; /* 增大点击区域，适配触屏 */
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 5px 10px; /* 移动端垂直排列按钮 */
+            transition: background-color 0.3s;
+            width: calc(100% - 12px); /* 按钮宽度自适应，留少量间距 */
+        }
+        
+        .btn:hover {
+            background-color: #ad1457;
+        }
+        
+        .message {
+            margin-top: 8px;
+            color: #333;
+            display: none;
+            font-size: 14px;
+        }
+        
+        /* 海报主体：默认大屏样式 */
+        .poster {
+            width: 800px;
+            max-width: 100%; /* 关键：限制最大宽度，适配小屏 */
+            background: linear-gradient(135deg, #fff6f7 0%, #ffe8eb 100%);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%);
+            color: white;
+            padding: 25px 20px; /* 减少上下内边距，适配小屏 */
+            text-align: center;
+            position: relative;
+        }
+        
+        .title {
+            font-size: 32px; /* 基础字号缩小，后续媒体查询再调整 */
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tagline {
+            font-size: 16px;
+            margin-bottom: 10px;
+            line-height: 1.5; /* 增加行高，避免文字拥挤 */
+        }
+        
+        .heart-icon {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px; /* 缩小图标，适配小屏 */
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* 内容区：默认双列网格 */
+        .content {
+            padding: 20px 15px; /* 减少内边距 */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .left-column, .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px; /* 缩小圆角，更适配小屏 */
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            color: #e91e63;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #ffe0e6;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 12px 8px;
+            background: #fff6f7;
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e91e63;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #777;
+        }
+        
+        .contact-info {
+            line-height: 1.7;
+            font-size: 14px; /* 缩小联系方式字体 */
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start; /* 文字换行时对齐图标 */
+            margin-bottom: 8px;
+        }
+        
+        .contact-icon {
+            width: 24px;
+            color: #e91e63;
+            font-size: 16px;
+            margin-top: 2px; /* 微调图标位置 */
+        }
+        
+        .qrcode-placeholder {
+            text-align: center;
+            padding: 12px;
+        }
+        
+        .qrcode {
+            width: 150px; /* 缩小二维码，适配小屏 */
+            height: 150px;
+            background: url(./img/qrcode.png) no-repeat 0 0 / 100%;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            border: 1px dashed #ddd;
+        }
+        
+        .slogan {
+            background: #fdeff2;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-style: italic;
+            color: #ad1457;
+            margin: 15px; /* 增加左右间距，避免文字贴边 */
+            border-left: 5px solid #e91e63;
+            font-size: 14px; /* 缩小slogan字体 */
+            line-height: 1.6;
+        }
+        
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-size: 13px;
+        }
+        
+        .highlight {
+            color: #ffeb3b;
+            font-weight: bold;
+        }
+        
+        .regions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .region-item {
+            background: #f8f8f8;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px; /* 缩小区域文字 */
+        }
+        
+        #previewContainer {
+            margin-top: 15px;
+            display: none;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        #previewImage {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* -------------- 移动端适配：屏幕宽度 ≤ 768px（平板/手机）-------------- */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 26px; /* 进一步缩小标题，避免换行 */
+            }
+            
+            .tagline {
+                font-size: 14px;
+            }
+            
+            .heart-icon {
+                font-size: 24px;
+            }
+            
+            /* 内容区从双列改为单列，避免小屏拥挤 */
+            .content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px 12px;
+            }
+            
+            .left-column, .right-column {
+                gap: 15px;
+            }
+            
+            .section {
+                padding: 12px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            
+            .stat-number {
+                font-size: 22px;
+            }
+            
+            .stat-label {
+                font-size: 12px;
+            }
+            
+            .contact-info {
+                font-size: 13px;
+            }
+            
+            .qrcode {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .slogan {
+                font-size: 13px;
+                padding: 12px;
+                margin: 12px;
+            }
+            
+            .footer {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+
+        /* -------------- 小屏手机适配：屏幕宽度 ≤ 480px -------------- */
+        @media (max-width: 480px) {
+            .title {
+                font-size: 24px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+            
+            .stats {
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 10px 5px;
+            }
+            
+            .stat-number {
+                font-size: 20px;
+            }
+            
+            /* 地址换行优化：避免文字溢出 */
+            .contact-item:nth-child(2) div:last-child {
+                word-break: break-all; /* 强制地址换行 */
+            }
+            
+            .qrcode {
+                width: 130px;
+                height: 130px;
+            }
+            
+            .slogan {
+                font-size: 12px;
+                line-height: 1.7;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 控制按钮区域 -->
+    <div class="controls">
+        <h3>好真实婚姻介绍所 - 宣传海报</h3>
+        <button class="btn" id="generateBtn">生成海报图片</button>
+        <button class="btn" id="downloadBtn" style="display: none;">下载海报图片</button>
+        <p class="message" id="successMsg">图片生成成功！</p>
+        <p class="message" id="errorMsg" style="color: #dc3545;">生成失败，请重试！</p>
+    </div>
+    
+    <!-- 海报主体 -->
+    <div class="poster" id="poster">
+        <div class="header">
+            <div class="heart-icon">❤</div>
+            <h1 class="title">好真实婚姻介绍所</h1>
+            <p class="tagline">梅州本地专业的婚姻介绍机构，开启幸福人生</p>
+        </div>
+        
+        <div class="content">
+            <div class="left-column">
+                <div class="section">
+                    <h2 class="section-title">机构成就</h2>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-number">1000+</div>
+                            <div class="stat-label">成立天数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">实名会员</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">100+</div>
+                            <div class="stat-label">婚配成功</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">客户满意度</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">覆盖区域</h2>
+                    <div class="regions">
+                        <div class="region-item">梅江区</div>
+                        <div class="region-item">梅县区</div>
+                        <div class="region-item">兴宁市</div>
+                        <div class="region-item">平远县</div>
+                        <div class="region-item">蕉岭县</div>
+                        <div class="region-item">大埔县</div>
+                        <div class="region-item">丰顺县</div>
+                        <div class="region-item">五华县</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">联系方式</h2>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div>手机/微信：13823827595（朱先生）</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">🏠</div>
+                            <div>地址：广东省梅州市梅江区城西大道田心47-7号第一层店面</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">🌐</div>
+                            <div>官网：haozhenshi.com/195707.com</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📱</div>
+                            <div>公众号：好真实婚姻介绍所</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="section">
+                    <h2 class="section-title">优选会员</h2>
+                    <div class="qrcode-placeholder">
+                        <div class="qrcode">
+                            <!-- 扫码查看优质会员 -->
+                        </div>
+                        <!-- <p>扫描二维码查看梅州本地优质单身会员信息</p> -->
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">服务特色</h2>
+                    <ul style="padding-left: 20px; line-height: 1.8; font-size: 14px;">
+                        <li>实名认证，信息真实可靠</li>
+                        <li>专业红娘一对一服务</li>
+                        <li>定期举办线下相亲活动</li>
+                        <li>个性化匹配推荐</li>
+                        <li>隐私保护，安全放心</li>
+                        <li>梅州本地资源丰富</li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">成功故事</h2>
+                    <div style="font-style: italic; color: #666; line-height: 1.6; font-size: 13px;">
+                        <p>"感谢好真实婚姻介绍所，让我遇到了人生的另一半，现在我们已结婚两年，有了可爱的宝宝！" —— 张女士</p>
+                        <p style="margin-top: 8px;">"专业耐心的服务，精准的匹配，让我在三个月内就找到了合适的伴侣！" —— 李先生</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slogan">
+            好真实婚姻介绍所，梅州本地专业婚恋服务机构，诚信为本，已帮助数千单身人士找到幸福归宿。
+        </div>
+        
+        <div class="footer">
+            <p>幸福热线：<span class="highlight">13823827595</span> | 欢迎来访咨询</p>
+        </div>
+    </div>
+    
+    <!-- 图片预览区域 -->
+    <div id="previewContainer">
+        <h3>海报图片预览</h3>
+        <img id="previewImage" src="" alt="海报图片预览">
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const generateBtn = document.getElementById('generateBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const poster = document.getElementById('poster');
+        const previewImage = document.getElementById('previewImage');
+        const previewContainer = document.getElementById('previewContainer');
+        const successMsg = document.getElementById('successMsg');
+        const errorMsg = document.getElementById('errorMsg');
+        let imageUrl = '';
+        
+        // 生成海报图片
+        generateBtn.addEventListener('click', () => {
+            // 显示加载状态
+            generateBtn.textContent = '生成中...';
+            generateBtn.disabled = true;
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+            
+            // 使用html2canvas将海报转换为图片
+            html2canvas(poster, {
+                scale: 2, // 提高分辨率
+                useCORS: true, // 允许跨域图片
+                logging: false
+            }).then(canvas => {
+                // 生成图片URL
+                imageUrl = canvas.toDataURL('image/png');
+                
+                // 显示预览和下载按钮
+                previewImage.src = imageUrl;
+                previewContainer.style.display = 'block';
+                downloadBtn.style.display = 'inline-block';
+                
+                // 显示成功消息
+                successMsg.style.display = 'block';
+                
+                // 恢复按钮状态
+                generateBtn.textContent = '生成海报图片';
+                generateBtn.disabled = false;
+            }).catch(error => {
+                console.error('生成图片失败:', error);
+                
+                // 显示错误消息
+                errorMsg.style.display = 'block';
+                
+                // 恢复按钮状态
+                generateBtn.textContent = '生成海报图片';
+                generateBtn.disabled = false;
+            });
+        });
+        
+        // 下载海报图片
+        downloadBtn.addEventListener('click', () => {
+            if (!imageUrl) return;
+            
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = '好真实婚姻介绍所海报.png';
+            document.body.appendChild(link);
+            
+            // 触发下载
+            link.click();
+            
+            // 清理
+            document.body.removeChild(link);
+        });
+
+        // 适配移动端图片生成逻辑：调整canvas尺寸
+        function adjustCanvasForMobile(canvas) {
+            if (window.innerWidth <= 768) {
+                const scale = window.innerWidth / canvas.width;
+                const newCanvas = document.createElement('canvas');
+                newCanvas.width = canvas.width * scale;
+                newCanvas.height = canvas.height * scale;
+                const ctx = newCanvas.getContext('2d');
+                ctx.scale(scale, scale);
+                ctx.drawImage(canvas, 0, 0);
+                return newCanvas;
+            }
+            return canvas;
+        }
+    </script>
+</body>
+</html>
+    
